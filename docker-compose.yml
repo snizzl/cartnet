@@ -1,0 +1,36 @@
+networks:
+  cart-net:
+    driver: bridge
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_HOST_PORT}
+    command: npm run dev
+    depends_on:
+      - backend
+    networks:
+      - cart-net
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${BACKEND_HOST_PORT}:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/shopping
+    command: npm run dev
+    depends_on:
+      - mongo
+    networks:
+      - cart-net
+
+  mongo:
+    image: mongo:8.2.6
+    networks:
+      - cart-net
